@@ -69,5 +69,20 @@ def add_funcionario():
 
     return redirect(url_for('admin'))
 
+@app.post('/admin/add_product')
+def add_product():
+    nome = request.form.get('nome')
+    preco = request.form.get('preco', '').strip()
+    elementos = request.form.get('elementos')
+    
+    preco_centavos = int(float(preco) * 100)
+
+    agora = int(time.time())
+
+    exec_command("INSERT INTO menu_items (name, price, created_at, updated_at, active, elements) VALUES (?, ?, ?, ?, ?, ?)",
+                    (nome, preco_centavos, agora, agora, 1, elementos))
+
+    return redirect(url_for('admin'))
+
 if __name__ == '__main__':
     app.run(debug=True)

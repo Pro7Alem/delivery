@@ -40,6 +40,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- CADASTRO DE PRODUTO -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">Cadastrar Produto</div>
+                    <div class="card-body">
+                        <form action="/admin/add_product" method="POST">
+                            <input type="text" name="nome" class="form-control mb-2" placeholder="Nome" required>
+                            <input type="number" name="preco" class="form-control mb-2" placeholder="Preço em reais (sem simbolo)">
+                            <input type="text" name="elementos" class="form-control mb-2" placeholder="Elementos do produto" required>
+                            <button type="submit" class="btn btn-primary w-100">Salvar Produto</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
