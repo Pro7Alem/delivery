@@ -74,13 +74,31 @@ def add_product():
     nome = request.form.get('nome')
     preco = request.form.get('preco', '').strip()
     elementos = request.form.get('elementos')
-    
+
     preco_centavos = int(float(preco) * 100)
 
     agora = int(time.time())
 
     exec_command("INSERT INTO menu_items (name, price, created_at, updated_at, active, elements) VALUES (?, ?, ?, ?, ?, ?)",
                     (nome, preco_centavos, agora, agora, 1, elementos))
+
+    return redirect(url_for('admin'))
+
+
+@app.post('/admin/add_c_assets')
+def add_c_asset():
+    nome = request.form.get('nome')
+    categoria = request.form.get('categoria')
+    preco = request.form.get('preco', '').strip()
+    notas = request.form.get('notas')
+
+    preco_centavos = int(float(preco) * 100)
+
+    agora = int(time.time())
+
+    exec_command(
+        "INSERT INTO company_assets (name, category, value, acquired_at, notes) VALUES (?, ?, ?, ?, ?)",
+        (nome, categoria, preco_centavos, agora, notas))
 
     return redirect(url_for('admin'))
 
