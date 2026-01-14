@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novo Pedido</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <a href="/" class="btn btn-outline-secondary mb-3">← Voltar</a>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0">Lançar Novo Pedido</h4>
+            </div>
+            <div class="card-body">
+                <form action="/lancar" method="POST">
+                    <h5>Cliente</h5>
+                    <input type="text" name="cliente" class="form-control mb-3" placeholder="Nome do Cliente" required>
+
+                    <h5>Endereço</h5>
+                    <div class="row mb-3">
+                        <div class="col-8">
+                            <input type="text" name="rua" class="form-control" placeholder="Rua" required>
+                        </div>
+                        <div class="col-4">
+                            <input type="text" name="numero" class="form-control" placeholder="Nº" required>
+                        </div>
+                    </div>
+                    <input type="text" name="bairro" class="form-control mb-3" placeholder="Bairro" required>
+
+                    <h5>Pedido</h5>
+                    <input type="number" step="0.01" name="valor" class="form-control mb-3" placeholder="Valor Total (R$)" required>
+                    <textarea name="notas" class="form-control mb-3" rows="4" placeholder="Cole aqui o pedido do WhatsApp..."></textarea>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Lançar no Sistema</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
