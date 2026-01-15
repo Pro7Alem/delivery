@@ -4,7 +4,7 @@ def criar_tabelas():
     with get_conn() as conn:
         cur = conn.cursor()
 
-        # ENDEREÇOS
+        '''ENDEREÇOS
         cur.execute("""
             CREATE TABLE IF NOT EXISTS addresses (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,8 +17,8 @@ def criar_tabelas():
                 longitude REAL
             )
         """)
-
-        # CARDÁPIO
+'''
+        '''CARDÁPIO
         cur.execute("""
             CREATE TABLE IF NOT EXISTS menu_items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,8 +30,8 @@ def criar_tabelas():
                 elements TEXT NOT NULL
             )
         """)
-
-        # FUNCIONÁRIOS
+'''
+        '''FUNCIONÁRIOS
         cur.execute("""
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,8 +42,8 @@ def criar_tabelas():
                 updated_at INTEGER NOT NULL
             )
         """)
-
-        # MOTOBOYS
+'''
+        '''MOTOBOYS
         cur.execute("""
             CREATE TABLE IF NOT EXISTS couriers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,8 +52,8 @@ def criar_tabelas():
                 active INTEGER NOT NULL DEFAULT 1
             )
         """)
-
-        # PATRIMÔNIO
+'''
+        '''PATRIMÔNIO
         cur.execute("""
             CREATE TABLE IF NOT EXISTS company_assets (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,8 +64,8 @@ def criar_tabelas():
                 notes TEXT
             )
         """)
-
-        # PEDIDOS
+'''
+        '''PEDIDOS
         cur.execute("""
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,8 +82,8 @@ def criar_tabelas():
                 FOREIGN KEY (address_id) REFERENCES addresses(id)
             )
         """)
-
-        # ITENS DO PEDIDO
+'''
+        '''ITENS DO PEDIDO
         cur.execute("""
             CREATE TABLE IF NOT EXISTS order_items (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,8 +97,8 @@ def criar_tabelas():
                 FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)
             )
         """)
-
-        # VIAGENS
+'''
+        '''VIAGENS
         cur.execute("""
             CREATE TABLE IF NOT EXISTS trips (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -111,8 +111,8 @@ def criar_tabelas():
                 FOREIGN KEY (courier_id) REFERENCES couriers(id)
             )
         """)
-
-        # PEDIDOS DA VIAGEM
+'''
+        '''PEDIDOS DA VIAGEM
         cur.execute("""
             CREATE TABLE IF NOT EXISTS trip_orders (
                 trip_id INTEGER NOT NULL,
@@ -122,6 +122,7 @@ def criar_tabelas():
                 FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
             )
         """)
+'''
 
         # FINANCEIRO
         cur.execute("""
@@ -129,24 +130,36 @@ def criar_tabelas():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 type TEXT NOT NULL,
                 category TEXT NOT NULL,
-                amount INTEGER NOT NULL,
-                created_at INTEGER NOT NULL,
-                order_id INTEGER,
-                employee_id INTEGER,
-                courier_id INTEGER,
+                value_cents INTEGER NOT NULL,
                 description TEXT,
-                FOREIGN KEY (order_id) REFERENCES orders(id),
-                FOREIGN KEY (employee_id) REFERENCES employees(id),
-                FOREIGN KEY (courier_id) REFERENCES couriers(id)
+                ref_id INTEGER,
+                created_at INTEGER NOT NULL
             )
         """)
 
+
         # ÍNDICES (PERFORMANCE)
+        # Índice para buscar pedidos por endereço (útil para análise de regiões/bairros mais atendidos)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_orders_address ON orders(address_id)")
+
+        # Índice para filtrar pedidos por status (PENDING, PREPARING, DELIVERING, COMPLETED, CANCELLED)
+        # Essencial para dashboards e listagens de "pedidos ativos"
         cur.execute("CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)")
+
+        # Índice para buscar todos os itens de um pedido específico (acelera a montagem de detalhes do pedido)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id)")
+
+        # Índice para buscar todas as viagens de um motoboy específico (relatórios de entregas por entregador)
         cur.execute("CREATE INDEX IF NOT EXISTS idx_trips_courier ON trips(courier_id)")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_financial_order ON financial_entries(order_id)")
+
+        # 1. Para filtrar por Pedido/Funcionário/Motoboy rapidamente
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_financial_ref ON financial_entries(ref_id)")
+
+        # 2. Para gráficos de "Gastos por Categoria" (Pizza/Barras)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_financial_category ON financial_entries(category)")
+
+        # 3. O MAIS IMPORTANTE: Para filtros de data (Hoje, Últimos 7 dias, Mensal)
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_financial_date ON financial_entries(created_at)")
 
         conn.commit()
         print("✅ Todas as tabelas criadas com sucesso!")

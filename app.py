@@ -18,8 +18,10 @@ def novo_pedido():
 def admin():
     return render_template('admin.html')
 
-
-import json
+def add_financial_entry(tipo, categoria, valor_cents, descricao, ref_id=None):
+    agora = int(time.time())
+    exec_command("INSERT INTO financial_entries (type, category, value_cents, description, ref_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                 (tipo, categoria, valor_cents, descricao, ref_id, agora))
 
 
 @app.post('/lancar')
