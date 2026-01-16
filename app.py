@@ -7,8 +7,23 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    orders = exec_query("SELECT * FROM orders WHERE status = 'CONFIRMED' ORDER BY created_at DESC")
-    return render_template('index.html', orders=orders)
+    # 1. Busca pedidos ativos
+    orders = exec_query("""
+        SELECT o.*, a.street, a.number, a.district
+        FROM orders o
+        JOIN addresses a ON o.address_id = a.id
+        WHERE o.status = 'CONFIRMED'
+        ORDER BY o.created_at ASC
+    """)
+
+    # 2. Busca itens dos pedidos ativos
+    items_by_order = {}
+    for order in orders:
+        items = exec_query("SELECT name, quantity FROM order_items WHERE order_id = ?",
+                           (order['id'],))
+        items_by_order[order['id']] = items
+
+    return render_template('index.html', orders=orders, items_by_order=items_by_order)
 
 @app.route('/novo_pedido')
 def novo_pedido():

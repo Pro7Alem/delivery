@@ -17,5 +17,74 @@
         <hr>
         <p class="text-muted">Os pedidos aparecerão aqui em breve...</p>
     </div>
+
+<div class="row">
+    {% if not orders %}
+        <div class="col-12 text-center mt-5">
+            <p class="text-muted">No active orders. Time to rest! ☕</p>
+        </div>
+    {% endif %}
+
+    {% for order in orders %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card shadow-sm h-100 border-primary">
+            <!-- Cabeçalho do Card: ID e Valor Total -->
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">#{{ order.id }}</span>
+                <span class="badge bg-success">R$ {{ "%.2f"|format(order.total_value / 100) }}</span>
+            </div>
+
+            <div class="card-body">
+                <!-- Informações do Cliente e Endereço -->
+                <h5 class="card-title mb-1">{{ order.customer_name }}</h5>
+                <p class="card-text small text-muted mb-3">
+                    <i class="bi bi-geo-alt"></i> {{ order.street }}, {{ order.number }} - {{ order.district }}
+                </p>
+
+                <hr>
+
+                <!-- Lista de Itens com Checkbox para conferência -->
+                <h6 class="card-subtitle mb-2 text-muted small uppercase">ITEMS</h6>
+                <ul class="list-group list-group-flush">
+                    {% for item in items_by_order[order.id] %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 border-0">
+                        <span>
+                            <span class="badge bg-light text-dark border me-2">{{ item.quantity }}x</span>
+                            {{ item.name }}
+                        </span>
+                        <!-- Checkbox manual para o funcionário marcar o que já preparou -->
+                        <input type="checkbox" class="form-check-input border-primary">
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Observações do Pedido -->
+                {% if order.notes %}
+                <div class="mt-3 p-2 bg-warning bg-opacity-10 border border-warning rounded small">
+                    <strong>Note:</strong> {{ order.notes }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Ações do Pedido -->
+            <div class="card-footer bg-white border-top-0 d-flex justify-content-between pb-3">
+                <!-- Botão Cancelar -->
+                <form action="/update_order" method="POST" onsubmit="return confirm('Cancel this order?')">
+                    <input type="hidden" name="id" value="{{ order.id }}">
+                    <input type="hidden" name="action" value="CANCELLED">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
+                </form>
+
+                <!-- Botão Finalizar -->
+                <form action="/update_order" method="POST">
+                    <input type="hidden" name="id" value="{{ order.id }}">
+                    <input type="hidden" name="action" value="COMPLETED">
+                    <button type="submit" class="btn btn-success btn-sm px-4">Complete Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 </body>
 </html>
