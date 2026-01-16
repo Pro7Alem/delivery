@@ -5,6 +5,15 @@ import json
 
 app = Flask(__name__)
 
+# Dicionário de taxas de entrega por km (em centavos)
+DELIVERY_FEES = {
+    1: 700,   # R$ 7,00
+    2: 1000,  # R$ 10,00
+    3: 1300,  # R$ 13,00
+    4: 1600,  # R$ 16,00
+    5: 1900,  # R$ 19,00
+}
+
 @app.route('/')
 def index():
     # 1. Busca pedidos ativos
@@ -47,6 +56,10 @@ def criar_pedido():
     numero = request.form.get('numero', '').strip()
     bairro = request.form.get('bairro')
     notas = request.form.get('notas')
+    telefone = request.form.get('telefone', '').strip()
+    payment_method = request.form.get('payment_method')
+    distance = int(request.form.get('distance', '').strip())
+    reference = request.form.get('reference')
 
     # Recebe o JSON dos itens
     itens_json = request.form.get('itens_json')
@@ -56,8 +69,8 @@ def criar_pedido():
 
     # 1. Insere o endereço
     addr_id = exec_command(
-        "INSERT INTO addresses (street, number, district, city) VALUES (?, ?, ?, ?)",
-        (rua, numero, bairro, "BETIM")
+        "INSERT INTO addresses (street, number, district, city, reference) VALUES (?, ?, ?, ?, ?)",
+        (rua, numero, bairro, "BETIM", reference)
     )
 
     # 2. Busca os preços reais do banco e calcula o total
@@ -87,12 +100,16 @@ def criar_pedido():
 
         total_centavos += item_real['price'] * qtd
 
+    total_final = total_centavos + DELIVERY_FEES[distance]
+
     # 3. Insere o pedido com o valor REAL
     order_id = exec_command(
         """INSERT INTO orders
-               (status, created_at, address_id, customer_name, total_value, notes)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        ("CONFIRMED", agora, addr_id, cliente, total_centavos, notas)
+               (status, created_at, address_id, customer_name, customer_phone,
+                total_value, delivery_fee, payment_method, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        ("CONFIRMED", agora, addr_id, cliente, telefone,
+                total_final, DELIVERY_FEES[distance], payment_method, notas)
     )
 
     # 4. Insere cada item validado
