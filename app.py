@@ -7,7 +7,8 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    orders = exec_query("SELECT * FROM orders WHERE status = 'CONFIRMED' ORDER BY created_at DESC")
+    return render_template('index.html', orders=orders)
 
 @app.route('/novo_pedido')
 def novo_pedido():
@@ -98,13 +99,18 @@ def update_order():
     result = exec_query("SELECT status FROM orders WHERE id = ?",
                             (order_id,))
 
+    if not result:
+        return "Pedido nao encontrado", 404
+
     a_status = result[0]['status']
+    agora = int(time.time())
 
     if a_status == "CONFIRMED" and action == "COMPLETED":
-        exec_command("UPDATE orders SET status = ? WHERE id = ? AND status = ?",
-                    ("COMPLETED", order_id, "CONFIRMED"))
-    else: exec_command("UPDATE orders SET status = ? WHERE id = ? AND status = ?",
-                       ("CANCELLED", order_id, "CONFIRMED"))
+        exec_command("UPDATE orders SET status = ?, finished_at = ? WHERE id = ? AND status = ?",
+                    ("COMPLETED", agora, order_id, "CONFIRMED"))
+    else:
+        exec_command("UPDATE orders SET status = ?, finished_at = ? WHERE id = ? AND status = ?",
+                       ("CANCELLED", agora, order_id, "CONFIRMED"))
 
     return redirect(url_for('index'))
 
