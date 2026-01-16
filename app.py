@@ -76,7 +76,7 @@ def criar_pedido():
         """INSERT INTO orders
                (status, created_at, address_id, customer_name, total_value, notes)
            VALUES (?, ?, ?, ?, ?, ?)""",
-        ("PENDING", agora, addr_id, cliente, total_centavos, notas)
+        ("CONFIRMED", agora, addr_id, cliente, total_centavos, notas)
     )
 
     # 4. Insere cada item validado
@@ -89,6 +89,25 @@ def criar_pedido():
         )
 
     return redirect(url_for('index'))
+
+@app.post('/update_order')
+def update_order():
+    order_id = int(request.form.get('id', '').strip())
+    action = request.form.get('action', '').strip()
+
+    result = exec_query("SELECT status FROM orders WHERE id = ?",
+                            (order_id,))
+
+    a_status = result[0]['status']
+
+    if a_status == "CONFIRMED" and action == "COMPLETED":
+        exec_command("UPDATE orders SET status = ? WHERE id = ? AND status = ?",
+                    ("COMPLETED", order_id, "CONFIRMED"))
+    else: exec_command("UPDATE orders SET status = ? WHERE id = ? AND status = ?",
+                       ("CANCELLED", order_id, "CONFIRMED"))
+
+    return redirect(url_for('index'))
+
 
 @app.post('/admin/add_courier')
 def add_motoboy():
