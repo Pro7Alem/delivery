@@ -27,32 +27,21 @@
       <div class="card-body">
         <form action="/lancar" method="POST" id="formPedido">
 
+          <!-- CLIENTE -->
           <h5>Cliente</h5>
           <div class="row g-2 mb-2">
             <div class="col-8">
-              <input
-                type="text"
-                name="nome"
-                class="form-control"
-                placeholder="Nome"
-                required
-              >
+              <input type="text" name="nome" class="form-control" placeholder="Nome" required>
             </div>
             <div class="col-4">
-              <input
-                type="text"
-                name="telefone"
-                class="form-control"
-                placeholder="Telefone"
-                required
-              >
+              <input type="text" name="telefone" class="form-control" placeholder="Telefone" required>
             </div>
+          </div>
 
-
-          <div class="col-md-6">
-              <select name="metodo_pagamento" class="form-select" required>
+          <div class="row g-2 mb-2">
+            <div class="col-12">
+              <select name="payment_method" class="form-select" required>
                 <option value="" disabled selected>Método de Pagamento</option>
-                <option value="">Selecione...</option>
                 <option value="CASH">Dinheiro</option>
                 <option value="DEBIT">Débito</option>
                 <option value="CREDIT">Crédito</option>
@@ -63,61 +52,55 @@
 
           <hr class="my-4">
 
+          <!-- ENDEREÇO -->
           <h5>Endereço</h5>
           <div class="row g-2 mb-2">
             <div class="col-8">
-              <input
-                type="text"
-                name="rua"
-                class="form-control"
-                placeholder="Rua"
-                required
-              >
+              <input type="text" name="rua" class="form-control" placeholder="Rua" required>
             </div>
             <div class="col-4">
-              <input
-                type="text"
-                name="numero"
-                class="form-control"
-                placeholder="Nº"
-                required
-              >
+              <input type="text" name="numero" class="form-control" placeholder="Nº" required>
             </div>
           </div>
 
           <div class="row g-2 mb-2">
             <div class="col-8">
-              <input
-                type="text"
-                name="bairro"
-                class="form-control"
-                placeholder="Bairro"
-                required
-              >
+              <input type="text" name="bairro" class="form-control" placeholder="Bairro" required>
             </div>
             <div class="col-4">
-              <input
-                type="number"
-                name="distance"
-                class="form-control"
-                placeholder="Distancia em km"
-                required
-              >
+              <input type="number" name="distance" class="form-control" placeholder="Distância (km)" required>
             </div>
-            <div class="mb-3 mt-3">
-              <label class="form-label">Referência (opcional)</label>
-            <textarea
-              name="reference"
-              class="form-control"
-              rows="3"
-              placeholder="Ex: portão rosa, proximo ao crusamento..."
-            ></textarea>
-          </div>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label">Referência (opcional)</label>
+            <textarea name="reference" class="form-control" rows="2" placeholder="Ex: portão rosa, próximo ao cruzamento..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Link Google Maps (opcional)</label>
+            <textarea name="maps_url" class="form-control" rows="2" placeholder="Ex: https://maps.app.goo.gl/..."></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Entregador</label>
+            <select name="courier_id" class="form-select">
+              <option value="">Retirada no local</option>
+              {% for courier in couriers %}
+                <option value="{{ courier.id }}">
+                  {{ courier.name }}
+                  {% if courier.cost %}
+                    - R$ {{ "%.2f"|format(courier.cost / 100) }} ({{ courier.cost_obs }})
+                  {% endif %}
+                </option>
+              {% endfor %}
+            </select>
+            <div class="form-text">Selecione um entregador ou deixe vazio para retirada no local.</div>
+          </div>
 
           <hr class="my-4">
 
+          <!-- ITENS DO PEDIDO -->
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h5 class="mb-0">Itens do Pedido</h5>
             <small class="text-muted">Clique em "+" para adicionar linhas</small>
@@ -150,17 +133,11 @@
             </div>
           </div>
 
-          <!-- JS vai preencher isso no submit -->
           <input type="hidden" name="itens_json" id="itensJson">
 
           <div class="mb-3 mt-3">
             <label class="form-label">Observações (opcional)</label>
-            <textarea
-              name="notas"
-              class="form-control"
-              rows="3"
-              placeholder="Ex: sem cebola, trocar refri, troco pra 100..."
-            ></textarea>
+            <textarea name="notas" class="form-control" rows="3" placeholder="Ex: sem cebola, trocar refri, troco pra 100..."></textarea>
           </div>
 
           <hr class="my-4">

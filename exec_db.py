@@ -43,16 +43,20 @@ def criar_tabelas():
             )
         """)
 '''
-        '''MOTOBOYS
+        # MOTOBOYS
+        cur.execute("DROP TABLE IF EXISTS couriers")
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS couriers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 phone TEXT,
+                cost INTEGER NOT NULL,
+                cost_obs TEXT NOT NULL,
                 active INTEGER NOT NULL DEFAULT 1
             )
         """)
-'''
+
         '''PATRIMÔNIO
         cur.execute("""
             CREATE TABLE IF NOT EXISTS company_assets (
@@ -125,7 +129,7 @@ def criar_tabelas():
 '''
 
         # FINANCEIRO
-        cur.execute("""
+        '''cur.execute("""
             CREATE TABLE IF NOT EXISTS financial_entries (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 type TEXT NOT NULL,
@@ -135,7 +139,7 @@ def criar_tabelas():
                 ref_id INTEGER,
                 created_at INTEGER NOT NULL
             )
-        """)
+        """)'''
 
 
         # ÍNDICES (PERFORMANCE)

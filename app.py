@@ -37,7 +37,8 @@ def index():
 @app.route('/novo_pedido')
 def novo_pedido():
     menu = exec_query("SELECT id, name, price FROM menu_items WHERE active = 1")
-    return render_template('novo_pedido.html', menu=menu)
+    couriers = exec_query("SELECT id, name, phone, cost, cost_obs FROM couriers WHERE active = 1")
+    return render_template('novo_pedido.html', menu=menu, couriers=couriers)
 
 @app.route('/admin')
 def admin():
@@ -51,7 +52,7 @@ def add_financial_entry(tipo, categoria, valor_cents, descricao, ref_id=None):
 
 @app.post('/lancar')
 def criar_pedido():
-    cliente = request.form.get('cliente')
+    cliente = request.form.get('nome')
     rua = request.form.get('rua')
     numero = request.form.get('numero', '').strip()
     bairro = request.form.get('bairro')
@@ -60,6 +61,8 @@ def criar_pedido():
     payment_method = request.form.get('payment_method')
     distance = int(request.form.get('distance', '').strip())
     reference = request.form.get('reference')
+    courier_raw = request.form.get('courier_id')
+    maps_url = request.form.get('maps_url', '').strip()
 
     # Recebe o JSON dos itens
     itens_json = request.form.get('itens_json')
@@ -121,6 +124,16 @@ def criar_pedido():
             (order_id, item['id'], item['name'], item['quantity'], item['price'])
         )
 
+    if courier_raw:
+        # 1.5 Insere a viagem
+        courier = int(request.form.get('courier_id'))
+        trip_id = exec_command("""INSERT INTO trips (status, created_at, courier_id, maps_url)
+                            VALUES (?, ?, ?, ?)""",
+                            ("CONFIRMED", agora, courier, maps_url))
+
+        exec_command("INSERT INTO trip_orders (trip_id, order_id) VALUES (?, ?)",
+                     (trip_id, order_id))
+
     return redirect(url_for('index'))
 
 @app.post('/update_order')
@@ -151,9 +164,12 @@ def update_order():
 def add_motoboy():
     nome = request.form.get('nome')
     telefone = request.form.get('telefone', '').strip()
+    cost = int(request.form.get('cost', '').strip())
+    obs = request.form.get('obs')
+    obs_caps = obs.upper()
 
-    exec_command("INSERT INTO couriers (name, phone, active) VALUES (?, ?, ?)",
-                 (nome, telefone, 1))
+    exec_command("INSERT INTO couriers (name, phone, cost, cost_obs, active) VALUES (?, ?, ?, ?, ?)",
+                 (nome, telefone, cost, obs_caps, 1))
 
     return redirect(url_for('admin'))
 
